@@ -49,7 +49,7 @@
   </div>
 
   <script>
-    fetch("http://localhost:3000/api/approved-documents")
+    fetch("https://ciel2707.onrender.com/api/approved-documents")
       .then(res => res.json())
       .then(data => {
         const tbody = document.getElementById("review-table-body");
@@ -92,7 +92,7 @@ function handleReviewChange(selectElement) {
 
   if (!selectedStatus) return;
 
-  fetch("http://localhost:3000/api/review", {
+  fetch("https://ciel2707.onrender.com/api/review", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
