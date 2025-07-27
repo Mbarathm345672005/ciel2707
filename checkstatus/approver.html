@@ -73,7 +73,7 @@
 </body>
 <script>
 // Fetch data and populate the table
-fetch("http://localhost:3000/api/documents")
+fetch("https://ciel2707.onrender.com/api/documents")
   .then(res => res.json())
   .then(data => {
     const tbody = document.getElementById("document-table-body");
@@ -122,7 +122,7 @@ function updateApprovalStatus(selectElement) {
   const id = selectElement.getAttribute("data-id");
   const newStatus = selectElement.value;
 
-  fetch(`http://localhost:3000/api/approve/${id}`, {
+  fetch(`https://ciel2707.onrender.com/api/approve/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
