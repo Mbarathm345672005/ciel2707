@@ -10,30 +10,62 @@ const fs = require("fs"); // Required for file system operations (deleting local
 const { google } = require("googleapis"); // Google APIs for Drive
 require("dotenv").config(); // Load .env variables
 
-// --- Google Drive Configuration ---
-// 🔐 Load Google Drive credentials
 let CREDENTIALS;
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
-  // Production environment (Render)
+
+// Define the path where Render will mount the secret file
+// This MUST match the 'Path' you set in Render's Secret Files.
+const RENDER_SECRET_FILE_PATH = '/etc/secrets/google_credentials.json';
+
+// Check if we are likely in a Render production environment
+// by checking for the presence of the secret file path
+if (fs.existsSync(RENDER_SECRET_FILE_PATH)) {
+  // Production environment (Render - reading from mounted secret file)
   try {
-    CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
-    console.log("✅ Google Drive credentials loaded from GOOGLE_CREDENTIALS_JSON environment variable.");
+    const credentialsContent = fs.readFileSync(RENDER_SECRET_FILE_PATH, 'utf8');
+    CREDENTIALS = JSON.parse(credentialsContent);
+    console.log("✅ Google Drive credentials loaded from Render Secret File.");
   } catch (e) {
-    console.error("❌ Error parsing GOOGLE_CREDENTIALS_JSON environment variable. Please check its format:", e.message);
-    // It's critical to have credentials, so exit if parsing fails in prod
+    console.error(`❌ Error loading or parsing Google Drive credentials from secret file at ${RENDER_SECRET_FILE_PATH}:`, e.message);
     process.exit(1);
   }
 } else {
-  // Local development environment (if the JSON file is present and env var is not set)
+  // Local development environment (if the JSON file is present)
   try {
+    // This path should be relative to where your Node.js script is run
     CREDENTIALS = require("./impactful-yeti-466710-a9-c4f8c0ecc621.json");
     console.log("✅ Google Drive credentials loaded from local JSON file (for development).");
   } catch (e) {
     console.error("❌ Google Drive credentials file './impactful-yeti-466710-a9-c4f8c0ecc621.json' not found locally.");
-    console.error("   For local development, ensure this file exists. For Render, ensure GOOGLE_CREDENTIALS_JSON env var is set.");
+    console.error("    For local development, ensure this file exists. For Render, ensure the secret file is configured.");
     process.exit(1); // Exit if credentials are not found even locally
   }
 }
+
+
+// --- Google Drive Configuration ---
+// 🔐 Load Google Drive credentials
+// let CREDENTIALS;
+// if (process.env.GOOGLE_CREDENTIALS_JSON) {
+//   // Production environment (Render)
+//   try {
+//     CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+//     console.log("✅ Google Drive credentials loaded from GOOGLE_CREDENTIALS_JSON environment variable.");
+//   } catch (e) {
+//     console.error("❌ Error parsing GOOGLE_CREDENTIALS_JSON environment variable. Please check its format:", e.message);
+//     // It's critical to have credentials, so exit if parsing fails in prod
+//     process.exit(1);
+//   }
+// } else {
+//   // Local development environment (if the JSON file is present and env var is not set)
+//   try {
+//     CREDENTIALS = require("./impactful-yeti-466710-a9-c4f8c0ecc621.json");
+//     console.log("✅ Google Drive credentials loaded from local JSON file (for development).");
+//   } catch (e) {
+//     console.error("❌ Google Drive credentials file './impactful-yeti-466710-a9-c4f8c0ecc621.json' not found locally.");
+//     console.error("   For local development, ensure this file exists. For Render, ensure GOOGLE_CREDENTIALS_JSON env var is set.");
+//     process.exit(1); // Exit if credentials are not found even locally
+//   }
+// }
 
 // Ensure CREDENTIALS are loaded before proceeding
 if (!CREDENTIALS) {
@@ -73,7 +105,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // 🛡️ Middleware
 app.use("/uploads", express.static("uploads"));
@@ -91,7 +123,7 @@ const db = mysql.createPool({
   user: process.env.USER,
   password: process.env.PASSWORD, // update if needed
   database: process.env.DATABASE,
-  port:process.env.PORT
+  port:process.env.DBPORT
 });
 async function testDbConnection() {
     try {
