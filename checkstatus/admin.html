@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Two Button Navigation</title>
+  <style>
+    body {
+      background-color: #f5f7fa;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    h2 {
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      margin: 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    .btn-page1 {
+      background-color: #007bff;
+    }
+
+    .btn-page1:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-page2 {
+      background-color: #28a745;
+    }
+
+    .btn-page2:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Select a Page to Visit</h2>
+  
+  <button class="btn btn-page1" onclick="goToPage1()">Full data</button>
+  <button class="btn btn-page2" onclick="goToPage2()">Filter data</button>
+
+  <script>
+    function goToPage1() {
+      window.location.href = "index.html"; // Make sure page1.html exists
+    }
+
+    function goToPage2() {
+      window.location.href = "checkstatus.html"; // Make sure page2.html exists
+    }
+  </script>
+
+</body>
+</html>

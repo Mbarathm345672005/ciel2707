@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approver Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container-box {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin: 40px auto;
+      max-width: 900px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th { background-color: #f2f2f2; }
+    .doc-link { color: blue; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container-box">
+    <h3>Approver Table</h3>
+    <!-- <table>
+      <thead>
+        <tr><th>Who</th><th>Username</th><th>Document Link</th><th>Uploaded Date & Time</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>John A.</td>
+          <td>Approver</td>
+          <td><a class="doc-link" href="https://example.com/doc1" target="_blank">View Document</a></td>
+          <td>2025-07-15 10:00 AM</td>
+          <td>
+            <select>
+              <option>Approved</option>
+              <option>Not Approved</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table> -->
+
+<table>
+  <thead>
+    <tr>
+      <th>Who</th>
+      <th>Username</th>
+      <th>Document Link</th>
+      <th>Uploaded Date & Time</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody id="document-table-body">
+    <!-- Rows will be populated via JavaScript -->
+  </tbody>
+</table>
+  </div>
+</body>
+<script>
+// Fetch data and populate the table
+fetch("http://localhost:3000/api/documents")
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById("document-table-body");
+    tbody.innerHTML = "";
+
+data.forEach(doc => {
+  const row = document.createElement("tr");
+  const disabledAttr = (doc.approval_status === "Approved" || doc.approval_status === "Not Approved") ? "disabled" : "";
+
+  function getPreviewLink(originalLink) {
+    if (originalLink.includes("docs.google.com/document/") || originalLink.includes("docs.google.com/spreadsheets/") || originalLink.includes("docs.google.com/presentation/")) {
+      return originalLink.replace(/\/edit(\?usp=sharing)?/, "/preview");
+    } else if (originalLink.includes("drive.google.com/file/")) {
+        const fileIdMatch = originalLink.match(/id=([a-zA-Z0-9_-]+)/);
+        if (fileIdMatch && fileIdMatch[1]) {
+            return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+        } else if (originalLink.includes('/view')) {
+            return originalLink.replace(/\/view(\?usp=sharing)?/, "/preview");
+        } else {
+            return `https://docs.google.com/viewer?url=${encodeURIComponent(originalLink)}&embedded=true`;
+        }
+    }
+    return originalLink;
+  }
+
+  const previewLink = getPreviewLink(doc.document_link);
+
+  row.innerHTML = `
+    <td>${doc.uploaded_by}</td>
+    <td>Approver</td>
+    <td><a class="doc-link" href="${previewLink}" target="_blank">View Document</a></td>
+    <td>${new Date(doc.upload_time).toLocaleString()}</td>
+    <td>
+      <select data-id="${doc.id}" onchange="updateApprovalStatus(this)" ${disabledAttr}>
+        <option value="Pending" ${doc.approval_status === "Pending" ? "selected" : ""}>Pending</option>
+        <option value="Approved" ${doc.approval_status === "Approved" ? "selected" : ""}>Approved</option>
+        <option value="Not Approved" ${doc.approval_status === "Not Approved" ? "selected" : ""}>Not Approved</option>
+      </select>
+    </td>
+  `;
+        tbody.appendChild(row);
+    });
+  });
+
+function updateApprovalStatus(selectElement) {
+  const id = selectElement.getAttribute("data-id");
+  const newStatus = selectElement.value;
+
+  fetch(`http://localhost:3000/api/approve/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      approval_status: newStatus,
+      approved_by: "Approver", // Optional: dynamic if login added
+    }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "Status updated");
+    })
+    .catch(err => {
+      alert("Failed to update status");
+      console.error(err);
+    });
+}
+</script>
+</html>

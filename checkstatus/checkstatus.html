@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Check Document Status</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; }
+    h1 { text-align: center; margin-bottom: 40px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
+    th { background-color: #f2f2f2; }
+    .doc-link { color: blue; text-decoration: underline; }
+    .action-buttons { display: flex; gap: 8px; }
+    .action-buttons button {
+      padding: 6px 12px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+    }
+    .action-buttons button.share { background-color: #28a745; }
+    #searchContainer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #notFoundMsg {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Check Document Status</h1>
+
+  <div id="searchContainer">
+    <input type="text" id="searchInput" placeholder="Enter uploader name..." />
+    <button onclick="searchByUploader()">Search</button>
+  </div>
+
+  <div id="notFoundMsg"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Document</th>
+        <th>Uploaded By</th>
+        <th>Upload Time</th>
+        <th>Approved By</th>
+        <th>Approval Time</th>
+        <th>Reviewer</th>
+        <th>Review Time</th>
+        <th>Approval Status</th>
+        <th>Review Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="docTableBody">
+      <!-- Results will appear here -->
+    </tbody>
+  </table>
+
+  <script>
+    async function searchByUploader() {
+      const name = document.getElementById('searchInput').value.trim();
+      const tbody = document.getElementById('docTableBody');
+      const notFound = document.getElementById('notFoundMsg');
+      tbody.innerHTML = '';
+      notFound.innerText = '';
+
+      if (name === '') {
+        notFound.innerText = 'Please enter a name.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/document?uploaded_by=${encodeURIComponent(name)}`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+          notFound.innerText = 'No documents found for this uploader.';
+        } else {
+          data.forEach(doc => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td><a class="doc-link" href="${doc.document_link}" target="_blank">${doc.document_name}</a></td>
+              <td>${doc.uploaded_by}</td>
+              <td>${formatDate(doc.upload_time)}</td>
+              <td>${doc.approved_by}</td>
+              <td>${formatDate(doc.approval_time)}</td>
+              <td>${doc.reviewer}</td>
+              <td>${formatDate(doc.review_time)}</td>
+              <td>${doc.approval_status}</td>
+              <td>${doc.review_status}</td>
+              <td>
+                <div class="action-buttons">
+                  <button onclick="window.open('${doc.document_link}')">Download</button>
+                  <button class="share" onclick="alert('${doc.document_name} shared!')">Share</button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+        notFound.innerText = 'Error fetching data.';
+      }
+    }
+
+    function formatDate(dateTimeStr) {
+      if (!dateTimeStr) return '';
+      const date = new Date(dateTimeStr);
+      return date.toLocaleString('en-IN', { hour12: true });
+    }
+  </script>
+
+</body>
+</html>
