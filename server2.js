@@ -12,15 +12,41 @@ require("dotenv").config(); // Load .env variables
 
 // --- Google Drive Configuration ---
 // 🔐 Load Google Drive credentials
-const CREDENTIALS = require("./impactful-yeti-466710-a9-c4f8c0ecc621.json"); // Ensure this path is correct
+let CREDENTIALS;
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  // Production environment (Render)
+  try {
+    CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+    console.log("✅ Google Drive credentials loaded from GOOGLE_CREDENTIALS_JSON environment variable.");
+  } catch (e) {
+    console.error("❌ Error parsing GOOGLE_CREDENTIALS_JSON environment variable. Please check its format:", e.message);
+    // It's critical to have credentials, so exit if parsing fails in prod
+    process.exit(1);
+  }
+} else {
+  // Local development environment (if the JSON file is present and env var is not set)
+  try {
+    CREDENTIALS = require("./impactful-yeti-466710-a9-c4f8c0ecc621.json");
+    console.log("✅ Google Drive credentials loaded from local JSON file (for development).");
+  } catch (e) {
+    console.error("❌ Google Drive credentials file './impactful-yeti-466710-a9-c4f8c0ecc621.json' not found locally.");
+    console.error("   For local development, ensure this file exists. For Render, ensure GOOGLE_CREDENTIALS_JSON env var is set.");
+    process.exit(1); // Exit if credentials are not found even locally
+  }
+}
 
+// Ensure CREDENTIALS are loaded before proceeding
+if (!CREDENTIALS) {
+  console.error("❌ Critical: Google Drive credentials could not be loaded. Exiting.");
+  process.exit(1);
+}
 const auth = new google.auth.GoogleAuth({
   credentials: CREDENTIALS,
   scopes: ["https://www.googleapis.com/auth/drive.file"],
 });
 
 const driveService = google.drive({ version: "v3", auth });
-const SHARED_DRIVE_FOLDER_ID = process.env.SHARED_DRIVE_FOLDER_ID; // ✅ Your shared drive ID
+const SHARED_DRIVE_FOLDER_ID = process.env.SHAREDDRIVE; // ✅ Your shared drive ID
 // --- End Google Drive Configuration ---
 
 // OTP Store and generator
