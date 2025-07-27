@@ -493,7 +493,7 @@ function tryFunctions() {
       <div class="upload-area" onclick="document.getElementById('fileInput').click()">
         <p class="mb-2">Click or drag your document here</p>
         <!-- <button class="btn btn-primary mt-2">Browse Document</button> -->
-<form id="uploadForm" enctype="multipart/form-data" method="POST" action="http://localhost:3000/upload">
+<form id="uploadForm" enctype="multipart/form-data" method="POST" action="https://ciel2707.onrender.com/upload">
 <input type="file" name="file" accept=".pdf" required>
 <input type="text" name="uploadedBy" id="uploadedByInput" hidden>
   <button type="submit">Upload Document</button></form>
@@ -550,7 +550,7 @@ function tryFunctions() {
       notFound.innerText = '';
 
       try {
-        const response = await fetch(`http://localhost:3000/api/document?uploaded_by=${encodeURIComponent(name)}`);
+        const response = await fetch(`https://ciel2707.onrender.com/api/document?uploaded_by=${encodeURIComponent(name)}`);
         const data = await response.json();
 
         if (data.length === 0) {
@@ -594,7 +594,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
   e.preventDefault();
 
   const formData = new FormData(this);
-  const response = await fetch('http://localhost:3000/upload', {
+  const response = await fetch('https://ciel2707.onrender.com/upload', {
     method: 'POST',
     body: formData
   });
@@ -612,7 +612,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
   const username = document.querySelector('#login-section input[placeholder="Username"]').value.trim();
   const password = document.querySelector('#login-section input[placeholder="Password"]').value;
 
-  const res = await fetch("http://localhost:3000/admin-login", {
+  const res = await fetch("https://ciel2707.onrender.com/admin-login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -638,7 +638,7 @@ else if(username==="admin" && password==="admin123"){
   window.location.href="admin.html";
 }
 else{
-  const res = await fetch("http://localhost:3000/api/login", {
+  const res = await fetch("https://ciel2707.onrender.com/api/login", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ username, password })
@@ -700,7 +700,7 @@ async function sendSignupOTP() {
   
   try {
     
-    const res = await fetch("http://localhost:3000/send-otp", {
+    const res = await fetch("https://ciel2707.onrender.com/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email })
@@ -737,7 +737,7 @@ document.getElementById("create-account").addEventListener("click", async functi
 
   try {
     // Verify OTP first
-    const otpRes = await fetch("http://localhost:3000/verify-otp", {
+    const otpRes = await fetch("https://ciel2707.onrender.com/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, enteredOtp })
@@ -747,7 +747,7 @@ document.getElementById("create-account").addEventListener("click", async functi
     if (!otpRes.ok) return alert("OTP verification failed: " + otpData.message);
 
     // OTP verified – now do actual signup
-    const res = await fetch("http://localhost:3000/api/signup", {
+    const res = await fetch("https://ciel2707.onrender.com/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ first_name: firstName, last_name: lastName, username, email, password, phone })
@@ -781,7 +781,7 @@ async function sendResetOTP() {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/send-otp", {
+    const res = await fetch("https://ciel2707.onrender.com/send-otp", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ username, email })  // ✅ send both
@@ -824,7 +824,7 @@ async function resetPassword() {
     return alert("Passwords do not match.");
   }
 
-  const res = await fetch("http://localhost:3000/reset-password", {
+  const res = await fetch("https://ciel2707.onrender.com/reset-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, newPassword: newPass })
