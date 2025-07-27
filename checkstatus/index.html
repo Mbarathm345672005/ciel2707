@@ -81,7 +81,7 @@ body {
   <script>
     async function loadDocuments() {
       try {
-        const response = await fetch('http://localhost:3000/api/documents');
+        const response = await fetch('https://ciel2707.onrender.com/api/documents');
         const data = await response.json();
         const tbody = document.getElementById('docTableBody');
         tbody.innerHTML = '';
